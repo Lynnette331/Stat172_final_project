@@ -43,10 +43,10 @@ table(nfl$draftTeam)
 merged <- merged %>%
   mutate(
     region = case_when(
-      homeState %in% c() ~ "Midwest",
-      homeState %in% c() ~ "Northeast",
-      homeState %in% c() ~ "South",
-      homeState %in% c() ~ "West",
+      homeState %in% c("ND", "SD", "NE", "KS", "MN", "IA", "MO", "WI", "IL", "MI", "IN", "OH") ~ "Midwest",
+      homeState %in% c("ME","VT","NH","MA","CT","RI","NY","PA","NJ","DE") ~ "Northeast",
+      homeState %in% c("TX","OK","AR","LA","MS","AL","GA","FL","TN","KY","SC","NC","VA","WV","DC","MD") ~ "South",
+      homeState %in% c("WA","OR","CA","NV","ID","MT","WY","UT","CO","AZ","NM","HI","AK") ~ "West",
       TRUE ~ "Other"  # fallback for any states not matched
     )
   )
