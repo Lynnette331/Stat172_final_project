@@ -19,10 +19,7 @@ nfl <- merged %>%
 range(nfl$combineYear, na.rm = TRUE)
 nrow(nfl)
 
-summary(nfl)
-table(nfl$homeState)
-
-table(nfl$draftTeam)
+table(nfl$combineYear)
 
 # cleaning the draftTeam column
 nfl <- nfl %>%
@@ -39,8 +36,18 @@ nfl <- nfl %>%
 
 table(nfl$draftTeam)
 
+table(nfl$homeCountry)
+nfl <- nfl %>%
+  filter(homeCountry == "USA")
+
+nfl <- nfl %>%
+  mutate(
+    homeState = case_when(
+      homeState == "AS" ~ "AK",
+      TRUE ~ homeState))
+
 # creating a regions column
-merged <- merged %>%
+nfl <- nfl %>%
   mutate(
     region = case_when(
       homeState %in% c("ND", "SD", "NE", "KS", "MN", "IA", "MO", "WI", "IL", "MI", "IN", "OH") ~ "Midwest",
@@ -50,3 +57,8 @@ merged <- merged %>%
       TRUE ~ "Other"  # fallback for any states not matched
     )
   )
+
+table(nfl$region)
+table(nfl$homeState)
+
+
