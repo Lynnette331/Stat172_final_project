@@ -55,15 +55,7 @@ nfl <- nfl %>%
     combineVert   = ifelse(is.na(combineVert), median(combineVert, na.rm = TRUE), combineVert),
     combineBench  = ifelse(is.na(combineBench), median(combineBench, na.rm = TRUE), combineBench),
     combineShuttle = ifelse(is.na(combineShuttle), median(combineShuttle, na.rm = TRUE), combineShuttle),
-    combineBroad  = ifelse(is.na(combineBroad), median(combineBroad, na.rm = TRUE), combineBroad),
     combine3cone  = ifelse(is.na(combine3cone), median(combine3cone, na.rm = TRUE), combine3cone),
-    combineHand = ifelse(is.na(combineHand), median(combineHand, na.rm = TRUE), combineHand),
-    dob = ifelse(is.na(dob), median(dob, na.rm = TRUE), dob),
-    combineArm = ifelse(is.na(combineArm), median(combineArm, na.rm = TRUE), combineArm),
-    combine60ydShuttle = ifelse(is.na(combine60ydShuttle), median(combine60ydShuttle, na.rm = TRUE), combine60ydShuttle),
-    combineWonderlic = ifelse(is.na(combineWonderlic), median(combineWonderlic, na.rm = TRUE), combineWonderlic),
-    round = ifelse(is.na(round), median(round, na.rm = TRUE), round),
-    pick = ifelse(is.na(pick), median(pick, na.rm = TRUE), pick),
     ageAtDraft = ifelse(is.na(ageAtDraft), median(ageAtDraft, na.rm = TRUE), ageAtDraft)
   ) %>%
   ungroup()
@@ -81,14 +73,7 @@ nfl <- nfl %>%
     combineShuttle = ifelse(is.na(combineShuttle), median(combineShuttle, na.rm = TRUE), combineShuttle),
     combineBroad  = ifelse(is.na(combineBroad), median(combineBroad, na.rm = TRUE), combineBroad),
     combine3cone  = ifelse(is.na(combine3cone), median(combine3cone, na.rm = TRUE), combine3cone),
-    combineWonderlic = ifelse(is.na(combineWonderlic), median(combineWonderlic, na.rm = TRUE), combineWonderlic),
     ageAtDraft = ifelse(is.na(ageAtDraft), median(ageAtDraft, na.rm = TRUE), ageAtDraft),
-    combineHand = ifelse(is.na(combineHand), median(combineHand, na.rm = TRUE), combineHand),
-    dob = ifelse(is.na(dob), median(dob, na.rm = TRUE), dob),
-    combineArm = ifelse(is.na(combineArm), median(combineArm, na.rm = TRUE), combineArm),
-    combine60ydShuttle   = ifelse(is.na(combine60ydShuttle), median(combine60ydShuttle, na.rm = TRUE), combine60ydShuttle),
-    round   = ifelse(is.na(round), median(round, na.rm = TRUE), round),
-    pick   = ifelse(is.na(pick), median(pick, na.rm = TRUE), pick),
   )
 summary(nfl)
 
