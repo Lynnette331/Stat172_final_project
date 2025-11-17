@@ -1,5 +1,13 @@
 # Load tidyverse for data manipulation
+rm(list=ls())
 library(tidyverse)
+library(rpart)
+library(rpart.plot)
+library(pROC)
+library(dplyr)
+library(randomForest)
+library(tidymodels)
+
 
 # Read in the CSV files
 combine <- read_csv("combine.csv")
@@ -17,9 +25,6 @@ merged <- merged %>%
 nfl <- merged %>%
   filter(combineYear >= 2000)
 range(nfl$combineYear, na.rm = TRUE)
-nrow(nfl)
-
-table(nfl$combineYear)
 
 # cleaning the draftTeam column
 nfl <- nfl %>%
@@ -34,9 +39,6 @@ nfl <- nfl %>%
       draftTeam == "SL" ~ "LAR",
       TRUE ~ draftTeam))
 
-table(nfl$draftTeam)
-
-table(nfl$homeCountry)
 nfl <- nfl %>%
   filter(homeCountry == "USA")
 
@@ -58,7 +60,10 @@ nfl <- nfl %>%
     )
   )
 
-summary(nfl)
+nfl <- nfl %>% 
+  filter(region != "Other")
+
+
 #group the data according to the positions and then impute missing values accordingly
 nfl <- nfl %>%
   group_by(position) %>%
@@ -73,7 +78,7 @@ nfl <- nfl %>%
     ageAtDraft = ifelse(is.na(ageAtDraft), median(ageAtDraft, na.rm = TRUE), ageAtDraft)
   ) %>%
   ungroup()
-summary(nfl)
+
 
 #since there's still some more missing values, impute and replace with the overall median values across all positions
 
@@ -94,25 +99,27 @@ nfl$combineBMI <- (703 * nfl$combineWeight) / (nfl$combineHeight^2)
 nfl$top_three_round_bin <- ifelse(nfl$round %in% c(1, 2, 3), 1, 0)
 nfl$top_three_round_bin[is.na(nfl$round)] <- 0
 
-nfl_model <- nfl %>%
+nfl$top_three_round_class <- factor(nfl$top_three_round_bin, 
+                                    levels = c(0,1),
+                                    labels = c("Not Drafted", "Drafted") )
+
+offensive_positions <- c("C", "OG", "OL", "OT", "QB", "RB", "FB", "TE", "WR")
+nfl_offense <- nfl %>%
+  filter(position %in% offensive_positions)
+
+
+nfl_offense <- nfl_offense %>%
   select(combineHeight, combineWeight, combineBMI, ageAtDraft,
          combine40yd, combineVert, combineBench,
          combineShuttle, combineBroad, combine3cone,
-         region, top_three_round_bin)
+         region, top_three_round_bin, top_three_round_class)
 
-summary(nfl_model)
-
-nfl_model$top_three_round_class <- factor(nfl_model$top_three_round_bin, 
-                                        levels = c(0,1),
-                                        labels = c("Not Drafted", "Drafted") )
-
-# fitting a tree to predict getting drafted in round one in general 
 RNGkind(sample.kind = "default")
 set.seed(2291352)
 
-train.idx <- sample(x = 1:nrow(nfl_model), size = 0.7*nrow(nfl_model))
-train.df <- nfl_model[train.idx,]
-test.df <- nfl_model[-train.idx,] 
+train.idx <- sample(x = 1:nrow(nfl_offense), size = 0.7*nrow(nfl_offense))
+train.df <- nfl_offense[train.idx,]
+test.df <- nfl_offense[-train.idx,] 
 
 set.seed(172172172)
 ctree <- rpart(top_three_round_class ~ combineHeight + combineWeight + combineBMI + ageAtDraft + combine40yd + combineVert + combineBench + combineShuttle + combineBroad + combine3cone + region, # assumption: want to use every remaining variable as an x 
@@ -138,10 +145,10 @@ rocCurve <- roc(response = test.df$top_three_round_class, #supply truth in test 
 plot(rocCurve, print.thres = TRUE, print.auc = FALSE)
 
 # for our tuned tree, 
-# our Specificity is 0.633
-# our sensitivity is 0.623
-# so our tree will correctly prefict 73.1% of the non top-3 drafted players
-# our tree will correctly presuct 48.6% of the top-3 drafted players 
+# our Specificity is 0.946
+# our sensitivity is 0.169
+# so our tree will correctly prefict 94.6% of the non top-3 drafted players
+# our tree will correctly presuct 16.9% of the top-3 drafted players 
 
 # save column of categorical predictions 
 test.df$draft_pred <- predict(tunedtree, test.df, type = "class")
@@ -210,8 +217,8 @@ rocCurve <- roc(response = test.df$top_three_round_class,
 plot(rocCurve, print.thres = TRUE, print.auc = FALSE)
 # AUC is
 # Pi* is 
-# Specificity is 0.686 true negatives
-# Sensitivity is 0.614 true positives 
+# Specificity is 0.803 true negatives
+# Sensitivity is 0.0.553 true positives 
 
 # (8) Save a column of forest_preds 
 test.df$forest_preds <- predict(final_forest, test.df, type = "class")
@@ -219,72 +226,68 @@ view(test.df)
 
 # (9) variable importance plot 
 varImpPlot(final_forest, type=1)
-# in order of importance for top 3 rounds all positions:
-" 40 yard dash
-weight
-age 
-height
-BMI
-3cone
-vertical
-broad
-bench
-shuttle
-region"
-
-# fitting a logistic regression 
-
-m1 <- glm(top_three_round_bin ~ combine40yd,
-          data = nfl_model, family = binomial(link = "logit"))
-AIC(m1)
-# 5859
-m2 <- glm(top_three_round_bin ~ combine40yd + combineWeight,
-          data = nfl_model, family = binomial(link = "logit"))
-AIC(m2)
-# 5554
-m3 <- glm(top_three_round_bin ~ combine40yd + combineWeight + ageAtDraft,
-          data = nfl_model, family = binomial(link = "logit"))
-AIC(m3)
-# 5414
-m4 <- glm(top_three_round_bin ~ combine40yd + combineWeight + ageAtDraft + combineHeight,
-          data = nfl_model, family = binomial(link = "logit")) 
-AIC(m4)
-# 5393
-m5  <- glm(top_three_round_bin ~ combine40yd + combineWeight + ageAtDraft + combineHeight + combineBMI,
-           data = nfl_model, family = binomial(link = "logit")) 
-AIC(m5)
-# 5363
-m6 <- glm(top_three_round_bin ~ combine40yd + combineWeight + ageAtDraft + combineHeight + combineBMI + combine3cone,
-          data = nfl_model, family = binomial(link = "logit")) 
-AIC(m6)
-# 5337
-m7 <- glm(top_three_round_bin ~ combine40yd + combineWeight + ageAtDraft + combineHeight + combineBMI + combine3cone + combineVert,
-          data = nfl_model, family = binomial(link = "logit")) 
-AIC(m7)
-# 5325
-m8 <- glm(top_three_round_bin ~ combine40yd + combineWeight + ageAtDraft + combineHeight + combineBMI + combine3cone + combineVert + combineBroad,
-          data = nfl_model, family = binomial(link = "logit")) 
-AIC(m8)
-# 5316
-m9 <- glm(top_three_round_bin ~ combine40yd + combineWeight + ageAtDraft + combineHeight + combineBMI + combine3cone + combineVert + combineBroad + combineBench,
-          data = nfl_model, family = binomial(link = "logit"))
-AIC(m9)
-# 5299.661
-m10 <- glm(top_three_round_bin ~ combine40yd + combineWeight + ageAtDraft + combineHeight + combineBMI + combine3cone + combineVert + combineBroad + combineBench + combineShuttle,
-          data = nfl_model, family = binomial(link = "logit"))
-AIC(m10)
-# 5299.249
-# model 10 is our model with the lowest AIC
-# variables in the model
 "
+age at draft
+combine 40 yd
+combine weight 
+combine bmi
+combine shuttle
+3 cone 
+height 
+broad 
+vert 
+bench 
+region 
+" 
+
+# finding the best logistic regression model 
+
+m1 <- glm(top_three_round_bin ~ ageAtDraft,
+          data = nfl_offense, family = binomial(link = "logit"))
+AIC(m1)
+# 2861
+m2 <- glm(top_three_round_bin ~ ageAtDraft + combine40yd,
+          data = nfl_offense, family = binomial(link = "logit"))
+AIC(m2)
+# 2859
+m3 <- glm(top_three_round_bin ~ ageAtDraft + combine40yd + combineWeight,
+          data = nfl_offense, family = binomial(link = "logit"))
+AIC(m3)
+# 2749
+m4 <- glm(top_three_round_bin ~ ageAtDraft + combine40yd + combineWeight + combineBMI,
+          data = nfl_offense, family = binomial(link = "logit"))
+AIC(m4)
+# 2716
+m5 <- glm(top_three_round_bin ~ ageAtDraft + combine40yd + combineWeight + combineBMI + combineShuttle,
+          data = nfl_offense, family = binomial(link = "logit"))
+AIC(m5)
+# 2711
+m6 <- glm(top_three_round_bin ~ ageAtDraft + combine40yd + combineWeight + combineBMI + combineShuttle + combine3cone,
+          data = nfl_offense, family = binomial(link = "logit"))
+AIC(m6)
+# 2709
+m7 <- glm(top_three_round_bin ~ ageAtDraft + combine40yd + combineWeight + combineBMI + combineShuttle + combine3cone + combineHeight,
+          data = nfl_offense, family = binomial(link = "logit"))
+AIC(m7)
+# 2697
+m8 <- glm(top_three_round_bin ~ ageAtDraft + combine40yd + combineWeight + combineBMI + combineShuttle + combine3cone + combineHeight + combineBroad,
+          data = nfl_offense, family = binomial(link = "logit"))
+AIC(m8)
+# 2692.144
+m9 <- glm(top_three_round_bin ~ ageAtDraft + combine40yd + combineWeight + combineBMI + combineShuttle + combine3cone + combineHeight + combineBroad + combineVert,
+          data = nfl_offense, family = binomial(link = "logit"))
+AIC(m9)
+# 2692.311
+# model 8 is the bessdt model
+
+# variables used in the best model:
+"
+ageAtDraft + 
 combine40yd + 
 combineWeight + 
-ageAtDraft + 
-combineHeight + 
 combineBMI + 
+combineShuttle + 
 combine3cone + 
-combineVert + 
-combineBroad + 
-combineBench + 
-combineShuttle
+combineHeight + 
+combineBroad
 "
