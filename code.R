@@ -58,7 +58,11 @@ nfl <- nfl %>%
     )
   )
 
-table(nfl$region)
-table(nfl$homeState)
+nfl$first_round_bin <- ifelse(nfl$round == 1, 1, 0)
 
+nfl_model <- nfl %>%
+  select(combineHeight, combineWeight, ageAtDraft,
+         combine40yd, combineVert, combineBench,
+         combineShuttle, combineBroad, combine3cone,
+         region, first_round_bin)
 
