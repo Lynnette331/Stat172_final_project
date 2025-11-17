@@ -66,3 +66,38 @@ nfl_model <- nfl %>%
          combineShuttle, combineBroad, combine3cone,
          region, first_round_bin)
 
+summary(nfl)
+#group the data according to the positions and then impute missing values accordingly
+nfl <- nfl %>%
+  group_by(position) %>%
+  mutate(
+    combineHeight = ifelse(is.na(combineHeight), median(combineHeight, na.rm = TRUE), combineHeight),
+    combineWeight = ifelse(is.na(combineWeight), median(combineWeight, na.rm = TRUE), combineWeight),
+    combine40yd   = ifelse(is.na(combine40yd), median(combine40yd, na.rm = TRUE), combine40yd),
+    combineVert   = ifelse(is.na(combineVert), median(combineVert, na.rm = TRUE), combineVert),
+    combineBench  = ifelse(is.na(combineBench), median(combineBench, na.rm = TRUE), combineBench),
+    combineShuttle = ifelse(is.na(combineShuttle), median(combineShuttle, na.rm = TRUE), combineShuttle),
+    combine3cone  = ifelse(is.na(combine3cone), median(combine3cone, na.rm = TRUE), combine3cone),
+    ageAtDraft = ifelse(is.na(ageAtDraft), median(ageAtDraft, na.rm = TRUE), ageAtDraft)
+  ) %>%
+  ungroup()
+summary(nfl)
+
+#since there's still some more missing values, impute and replace with the overall median values across all positions
+
+nfl <- nfl %>%
+  mutate(
+    combine40yd   = ifelse(is.na(combine40yd), median(combine40yd, na.rm = TRUE), combine40yd),
+    combineVert   = ifelse(is.na(combineVert), median(combineVert, na.rm = TRUE), combineVert),
+    combineBench  = ifelse(is.na(combineBench), median(combineBench, na.rm = TRUE), combineBench),
+    combineShuttle = ifelse(is.na(combineShuttle), median(combineShuttle, na.rm = TRUE), combineShuttle),
+    combineBroad  = ifelse(is.na(combineBroad), median(combineBroad, na.rm = TRUE), combineBroad),
+    combine3cone  = ifelse(is.na(combine3cone), median(combine3cone, na.rm = TRUE), combine3cone),
+    ageAtDraft = ifelse(is.na(ageAtDraft), median(ageAtDraft, na.rm = TRUE), ageAtDraft),
+  )
+summary(nfl)
+
+
+
+
+
