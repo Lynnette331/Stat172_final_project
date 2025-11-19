@@ -207,7 +207,7 @@ pi_hat <- predict(final_forest, test.df, type = "prob")[,"Drafted"]
 rocCurve <- roc(response = test.df$top_three_round_class,
                 predictor = pi_hat,
                 levels = c("Not Drafted", "Drafted")) # negative, positive
-plot(rocCurve, print.thres = TRUE, print.auc = FALSE)
+plot(rocCurve, print.thres = TRUE, print.auc = TRUE)
 # AUC is
 # Pi* is 
 # Specificity is 0.686 true negatives

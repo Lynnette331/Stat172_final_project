@@ -99,37 +99,36 @@ nfl$combineBMI <- (703 * nfl$combineWeight) / (nfl$combineHeight^2)
 nfl$top_three_round_bin <- ifelse(nfl$round %in% c(1, 2, 3), 1, 0)
 nfl$top_three_round_bin[is.na(nfl$round)] <- 0
 
-nfl$top_three_round_class <- factor(nfl$top_three_round_bin, 
+nfl$drafted_class <- factor(nfl$top_three_round_bin, 
                                     levels = c(0,1),
                                     labels = c("Not Drafted", "Drafted") )
 
-offensive_positions <- c("C", "OG", "OL", "OT", "QB", "RB", "FB", "TE", "WR")
-nfl_offense <- nfl %>%
-  filter(position %in% offensive_positions)
+positions <- c("QB", "RB", "FB", "WR", "TE", "DB", "S", "LB", "OLB", "K", "P", "LS")
+nfl_smaller <- nfl %>%
+  filter(position %in% positions)
 
-
-nfl_offense <- nfl_offense %>%
+nfl_smaller <- nfl_smaller %>%
   select(combineHeight, combineWeight, combineBMI, ageAtDraft,
          combine40yd, combineVert, combineBench,
          combineShuttle, combineBroad, combine3cone,
-         region, top_three_round_bin, top_three_round_class)
+         region, top_three_round_bin, drafted_class)
 
 RNGkind(sample.kind = "default")
 set.seed(2291352)
 
-train.idx <- sample(x = 1:nrow(nfl_offense), size = 0.7*nrow(nfl_offense))
-train.df <- nfl_offense[train.idx,]
-test.df <- nfl_offense[-train.idx,] 
+train.idx <- sample(x = 1:nrow(nfl_smaller), size = 0.7*nrow(nfl_smaller))
+train.df <- nfl_smaller[train.idx,]
+test.df <- nfl_smaller[-train.idx,] 
 
 set.seed(172172172)
-ctree <- rpart(top_three_round_class ~ combineHeight + combineWeight + combineBMI + ageAtDraft + combine40yd + combineVert + combineBench + combineShuttle + combineBroad + combine3cone + region, # assumption: want to use every remaining variable as an x 
+ctree <- rpart(drafted_class ~ combineHeight + combineWeight + combineBMI + ageAtDraft + combine40yd + combineVert + combineBench + combineShuttle + combineBroad + combine3cone + region, # assumption: want to use every remaining variable as an x 
                data = train.df,
                method = "class")
 
 rpart.plot(ctree)
 
 # tuning the tree and making it large
-ctree <- rpart(top_three_round_class ~combineHeight + combineWeight + combineBMI + ageAtDraft + combine40yd + combineVert + combineBench + combineShuttle + combineBroad + combine3cone + region, # assumption: want to use every remaining variable as an x 
+ctree <- rpart(drafted_class ~ combineHeight + combineWeight + combineBMI + ageAtDraft + combine40yd + combineVert + combineBench + combineShuttle + combineBroad + combine3cone + region, # assumption: want to use every remaining variable as an x 
                data = train.df,
                method = "class",
                control = rpart.control(cp=0.0001, minsplit = 1))
@@ -139,25 +138,22 @@ rpart.plot(tunedtree)
 
 # make an ROC curve for final tree
 pi_hat <- predict(tunedtree, test.df, type="prob")[,"Drafted"]
-rocCurve <- roc(response = test.df$top_three_round_class, #supply truth in test set
+rocCurve <- roc(response = test.df$drafted_class, #supply truth in test set
                 predictor = pi_hat, # supply predicted probabilities
                 levels = c("Not Drafted", "Drafted")) #(negative, positive)
 plot(rocCurve, print.thres = TRUE, print.auc = FALSE)
 
 # for our tuned tree, 
-# our Specificity is 0.946
-# our sensitivity is 0.169
-# so our tree will correctly prefict 94.6% of the non top-3 drafted players
-# our tree will correctly presuct 16.9% of the top-3 drafted players 
+# our Specificity is
+# our sensitivity is 
+# so our tree will correctly prefict % of the non top-3 drafted players
+# our tree will correctly presuct % of the top-3 drafted players 
 
 # save column of categorical predictions 
 test.df$draft_pred <- predict(tunedtree, test.df, type = "class")
 summary(test.df$draft_pred)
 
-
-# starting on the forest
-
-myforest <- randomForest(top_three_round_class ~ combineHeight + combineWeight + combineBMI + ageAtDraft + combine40yd + combineVert + combineBench + combineShuttle + combineBroad + combine3cone + region,# recall notes on the syntax
+myforest <- randomForest(drafted_class ~ combineHeight + combineWeight + combineBMI + ageAtDraft + combine40yd + combineVert + combineBench + combineShuttle + combineBroad + combine3cone + region,# recall notes on the syntax
                          data = train.df, # training data
                          ntree = 500, 
                          mtry = 3,# choose m - sqrt(11)
@@ -171,7 +167,7 @@ rf_model <- rand_forest(mtry = tune(), # tune() tells it ot tune mtry parameter
 
 # step 2: create a recipe
 # here: be mindful! know what ~ means - what are your x veriables?
-rf_rec <- recipe(top_three_round_class ~ combineHeight + combineWeight + combineBMI + ageAtDraft + combine40yd + combineVert + combineBench + combineShuttle + combineBroad + combine3cone + region, data=train.df) # use trianing data set
+rf_rec <- recipe(drafted_class ~ combineHeight + combineWeight + combineBMI + ageAtDraft + combine40yd + combineVert + combineBench + combineShuttle + combineBroad + combine3cone + region, data=train.df) # use trianing data set
 
 # step 3: create the workflow
 rf_wf <- workflow() %>%
@@ -201,7 +197,7 @@ ggplot(data = rf_results) +
 
 best_params <- select_best(rf_tuned, metric = "roc_auc")
 
-final_forest <- final_forest <- randomForest(top_three_round_class ~ combineHeight + combineWeight + combineBMI + ageAtDraft + combine40yd + combineVert + combineBench + combineShuttle + combineBroad + combine3cone + region,
+final_forest <- final_forest <- randomForest(drafted_class ~ combineHeight + combineWeight + combineBMI + ageAtDraft + combine40yd + combineVert + combineBench + combineShuttle + combineBroad + combine3cone + region,
                                              data=train.df,
                                              ntree = 500,
                                              mtry = best_params %>% pull(mtry),
@@ -211,14 +207,12 @@ final_forest <- final_forest <- randomForest(top_three_round_class ~ combineHeig
 
 #(7) make an ROC curve for your final forest. What is AUC? Pi*? Spec and Sens
 pi_hat <- predict(final_forest, test.df, type = "prob")[,"Drafted"]
-rocCurve <- roc(response = test.df$top_three_round_class,
+rocCurve <- roc(response = test.df$drafted_class,
                 predictor = pi_hat,
                 levels = c("Not Drafted", "Drafted")) # negative, positive
-plot(rocCurve, print.thres = TRUE, print.auc =TRUE)
-# AUC is
-# Pi* is 
-# Specificity is 0.803 true negatives
-# Sensitivity is 0.0.553 true positives 
+plot(rocCurve, print.thres = TRUE, print.auc = TRUE)
+# Specificity is 0.546 true negatives
+# Sensitivity is 0.757 true positives 
 
 # (8) Save a column of forest_preds 
 test.df$forest_preds <- predict(final_forest, test.df, type = "class")
@@ -226,68 +220,3 @@ view(test.df)
 
 # (9) variable importance plot 
 varImpPlot(final_forest, type=1)
-"
-age at draft
-combine 40 yd
-combine weight 
-combine bmi
-combine shuttle
-3 cone 
-height 
-broad 
-vert 
-bench 
-region 
-" 
-
-# finding the best logistic regression model 
-
-m1 <- glm(top_three_round_bin ~ ageAtDraft,
-          data = nfl_offense, family = binomial(link = "logit"))
-AIC(m1)
-# 2861
-m2 <- glm(top_three_round_bin ~ ageAtDraft + combine40yd,
-          data = nfl_offense, family = binomial(link = "logit"))
-AIC(m2)
-# 2859
-m3 <- glm(top_three_round_bin ~ ageAtDraft + combine40yd + combineWeight,
-          data = nfl_offense, family = binomial(link = "logit"))
-AIC(m3)
-# 2749
-m4 <- glm(top_three_round_bin ~ ageAtDraft + combine40yd + combineWeight + combineBMI,
-          data = nfl_offense, family = binomial(link = "logit"))
-AIC(m4)
-# 2716
-m5 <- glm(top_three_round_bin ~ ageAtDraft + combine40yd + combineWeight + combineBMI + combineShuttle,
-          data = nfl_offense, family = binomial(link = "logit"))
-AIC(m5)
-# 2711
-m6 <- glm(top_three_round_bin ~ ageAtDraft + combine40yd + combineWeight + combineBMI + combineShuttle + combine3cone,
-          data = nfl_offense, family = binomial(link = "logit"))
-AIC(m6)
-# 2709
-m7 <- glm(top_three_round_bin ~ ageAtDraft + combine40yd + combineWeight + combineBMI + combineShuttle + combine3cone + combineHeight,
-          data = nfl_offense, family = binomial(link = "logit"))
-AIC(m7)
-# 2697
-m8 <- glm(top_three_round_bin ~ ageAtDraft + combine40yd + combineWeight + combineBMI + combineShuttle + combine3cone + combineHeight + combineBroad,
-          data = nfl_offense, family = binomial(link = "logit"))
-AIC(m8)
-# 2692.144
-m9 <- glm(top_three_round_bin ~ ageAtDraft + combine40yd + combineWeight + combineBMI + combineShuttle + combine3cone + combineHeight + combineBroad + combineVert,
-          data = nfl_offense, family = binomial(link = "logit"))
-AIC(m9)
-# 2692.311
-# model 8 is the bessdt model
-
-# variables used in the best model:
-"
-ageAtDraft + 
-combine40yd + 
-combineWeight + 
-combineBMI + 
-combineShuttle + 
-combine3cone + 
-combineHeight + 
-combineBroad
-"
