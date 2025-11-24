@@ -10,8 +10,8 @@ library(tidymodels)
 
 
 # Read in the CSV files
-combine <- read_csv("combine.csv")
-draft <- read_csv("draft.csv")
+combine <- read_csv("raw/combine.csv")
+draft <- read_csv("raw/draft.csv")
 
 # Merge on playerId (keeping all combine players)
 merged <- combine %>%
