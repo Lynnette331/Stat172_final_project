@@ -9,10 +9,8 @@ nfl_model <- nfl[, !names(nfl) %in% c("playerID", "combinePosition", "ageAtDraft
                    "nflId", "region", "college", "playerProfileUrl", "homeCity",
                    "homeState", "homeCountry", "highSchool", "hsCity", "hsState", 
                    "hsCountry", "combine60ydShuttle", "combineWonderlic", "draftTeam", "combineArm",
-                   "drafted_class", "round", "drafted", "pick", "heightInches", "weight"
+                   "drafted_class", "round", "drafted", "pick", "heightInches", "weight", "top_three_round_classDrafted"
                    )]
-
-
 
 # Fix for Date columns specifically
 nfl_model <- nfl_model %>%
@@ -66,8 +64,9 @@ lr_ridge_cv <- cv.glmnet(x.train, y.train,
 
 #plot results from cross validation procedures
 plot(lr_lasso_cv, sign.lambda = 1)
+ggsave("output/lasso.pdf")
 plot(lr_ridge_cv, sign.lambda = 1)
-
+ggsave("output/ridge.pdf")
 
 #save the "best" lambdas
 best_lasso_lambda <- lr_lasso_cv$lambda.min

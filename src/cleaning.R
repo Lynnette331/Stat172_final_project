@@ -7,6 +7,8 @@ library(pROC)
 library(dplyr)
 library(randomForest)
 library(tidymodels)
+library(glmnet)
+library(usmap)
 
 
 # Read in the CSV files
@@ -91,6 +93,7 @@ nfl <- nfl %>%
     combineBroad  = ifelse(is.na(combineBroad), median(combineBroad, na.rm = TRUE), combineBroad),
     combine3cone  = ifelse(is.na(combine3cone), median(combine3cone, na.rm = TRUE), combine3cone),
     ageAtDraft = ifelse(is.na(ageAtDraft), median(ageAtDraft, na.rm = TRUE), ageAtDraft),
+    dob = ifelse(is.na(dob), median(dob, na.rm = TRUE), dob)
   )
 
 # adding in a bmi variable
@@ -102,3 +105,11 @@ nfl$top_three_round_bin[is.na(nfl$round)] <- 0
 nfl$drafted_class <- factor(nfl$top_three_round_bin, 
                             levels = c(0,1),
                             labels = c("Not Drafted", "Drafted") )
+
+#create a class of the top three
+nfl$top_three_round_class <- factor(
+  nfl$top_three_round_bin,
+  levels = c(0, 1),
+  labels = c("Not Drafted", "Drafted")
+)
+
