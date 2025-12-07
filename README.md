@@ -1,2 +1,203 @@
-# Stat172_final_project
-Repository for stat172 final project
+# Stat172 final project
+---
+Predicting NFL Draft Outcomes Using Combine and NFL data
+
+Authors: Haley Harves & Lynette Ndibalekera
+
+Last Updated: December 7, 2025
+---
+---
+## 📌 Project Overview
+
+This project analyzes whether NFL Draft outcomes can be accurately predicted using only NFL Combine performance metrics. Our goal is to evaluate the predictive power of combine attributes like 40-yard dash, bench press, weight, and more across different player positions. 
+
+We apply multiple statistical learning techniques, compare model performance, identify key predictors, and generate reproducible visualizations and trained model files. This project demonstrates how combine performance translates into draft success.
+
+---
+
+### Project Structure
+```
+├── Stat172_final_project
+├── raw
+│       └── combine.csv
+│       └── draft.csv          
+├── src
+│           └── allPlayers.R
+│           └── cleaning.R
+│           └── defense.R
+│           └── OandDLine.R
+│           └── offense.R
+│           └── QBs.R
+│           └── ridgeandlasso.R
+│           └── smallerPositions.R
+│           └── visualizations.R
+├── Output
+│       └── 3_cone_vs_40-yard.pdf
+|       └── age_and_40-yard.pdf
+|       └── age_and_weight.pdf
+|       └── age_histogram.pdf
+|       └── age_vs_weight.pdf
+|       └── agility_vs_speed.pdf
+|       └── all_players_final_forest_importance_plot.pdf
+|       └── All_players_final_forest_plot.pdf
+|       └── all_players_final_forest_rocCurve.pdf
+|       └── boxplots_of_weight_by_region.pdf
+|       └── defense_ctree.pdf
+|       └── defense_final_forest_rocCurve.pdf
+|       └── defense_importance_plot.pdf
+|       └── defense_tuned_ctree.pdf
+|       └── defense_tuned_tree_rocCurve.pdf
+|       └── lasso.pdf
+|       └── final_forest_rocCurve_smallerPositions.pdf
+|       └── forest_comparison.pdf
+|       └── heatmap_top3picks_plot.pdf
+|       └── lasso.pdf
+|       └── mtry_tuning_plot_defense.pdf
+|       └── mtry_tuning_plot.pdf
+|       └── OandDLine_ctree.pdf
+|       └── OandDLine_final_forest_rocCurve.pdf
+|       └── OandDLine_mtry.pdf
+|       └── OandDLine_rocCurve.pdf
+|       └── OandDLine_tunedtree.pdf
+|       └── offense_ctree.pdf
+|       └── offense_final_forest_rocCurve.pdf
+|       └── offense_prunedtree.pdf
+|       └── offense_randomforest.pdf
+|       └── offense_rf_results.pdf
+|       └── offense_rocCurve.pdf
+|       └── QBs_ctree.pdf
+|       └── QBs_rocCurve.pdf
+|       └── random_forest_smallerPositions.pdf
+|       └── ridge.pdf
+|       └── scatter_plot_for_weight_vs_40-yard.pdf
+|       └── smallerPositions_ctree.pdf
+|       └── smallerPositions_tunedtree.pdf
+|       └── tunedtree_rocCurve.pdf
+|       └── var_importance_plot.pdf
+│       └── final_forest.ALL.rds
+│       └── final_forest_QBs.rds
+│       └── final_forest_smallerPositions.rds
+└── README.md
+```
+---
+###  Data Sources
+We use two datasets downloaded from Opendatabay:
+- `combine.csv` — NFL Combine performance metrics (height, weight, speed, agility, etc.)  
+- `draft.csv` — NFL Draft results including picks, round, and player IDs
+**Source:** https://opendatabay.com  
+**Download Date:** November 2025  
+**Format:** Both files are CSV and merged by a shared player ID.
+  
+### Data Preparation
+All data cleaning is fully reproducible using `src/cleaning.R` and includes:
+- Merging combine and draft datasets  
+- Keeping combine participants from year 2000 onward  
+- Mapping U.S. states into geographic regions  
+- Imputing missing combine metrics  
+- Creating modeling variables (e.g., binary indicators for “Top 3 roun Picks”)  
+- Ensuring consistent data types and removing invalid entries  
+
+A cleaned dataset is written to the `Output/` directory for downstream scripts.
+---
+
+##  Models Implemented
+Our analysis includes:
+
+### **Random Forests**
+- Predict draft outcome probability  
+- Separate forests for all players, QBs, and smaller positions  
+- Variable importance extraction  
+- Position-specific ROC curves
+
+### **Ridge Regression**
+- Shrinkage applied to identify distributed importance  
+- Used primarily for prediction comparisons
+
+### **Lasso Regression**
+- Performs feature selection  
+- Identifies the most influential combine metrics
+
+### **Classification Trees**
+- Interpretable decision boundaries  
+- Includes tuned and pruned versions  
+- Position-specific trees
+
+---
+## 📦 Required R Packages
+Install all necessary packages with:
+
+```r
+install.packages(c(
+  "tidyverse", "dplyr", "randomForest", "rpart", "rpart.plot", 
+  "tidymodels", "pROC", "glmnet", "usmap"
+))
+```
+---
+## Reproducibility
+This project is fully reproducible using the data, scripts, and model files included in the repository. All preprocessing, modeling, and visualization steps are executed entirely through R code no manual data manipulation is required.
+All scripts that involve random number generation (model training, cross-validation) include a fixed seed at the top.
+
+All data cleaning steps are implemented in 'Stat172_final_project/src/cleaning.R'
+Running this script will:
+- Read raw combine and draft data
+- Merge datasets
+- Filter years 2000+
+- Create region variables
+- Impute missing values
+- Construct modeling variable (top 3 round picks)
+
+## Reproducing the Full Analysis
+To reproduce all models, figures, and outputs:
+- Open R or RStudio.
+- Set the working directory to the root project folder:
+- setwd("path/to/Stat172_final_project")
+- Run the cleaning script: source("src/cleaning.R")
+- Run the modeling scripts for each player group:
+  - source("src/allPlayers.R")
+  - source("src/QBs.R")
+  - source("src/smallerPositions.R")
+  - source("src/OandDLine.R")
+  - source("src/defense.R")
+  - source("src/offense.R")
+- Run the penalized regression analyses:
+    - source("src/ridgeandlasso.R")
+- Generate all visualizations:
+  - source("src/visualizations.R")
+- Running these scripts will create:
+  -  All ROC curves
+  -  Random forest importance plots
+  - Ridge and lasso coefficient paths
+  - Classification trees
+  - Final forests .rds model files
+  - All pdf plots used in the report
+  - All outputs are automatically saved to the Output/ directory.
+  
+  
+
+-----------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
