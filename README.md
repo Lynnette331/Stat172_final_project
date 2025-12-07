@@ -1,10 +1,7 @@
 # Stat172_final_project
 Repository for stat172 final project
 ---
-title: Predicting NFL Draft Outcomes
-authors: "Lynette Ndibalekera and Haley Harves"
-date: "12/7/2025"
-output: "html_document"
+Predicting NFL Draft Outcomes
 ---
 
 ## Introduction
@@ -121,8 +118,9 @@ Lasso Regression:
 
 -   Haley Harves - Data Analyst
 -   Lynette Ndibalekera - Data Analyst
+-   12/7/2025"
 
-
+  output: "html_document"
 
 
 
