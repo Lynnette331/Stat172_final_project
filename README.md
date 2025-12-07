@@ -135,8 +135,7 @@ install.packages(c(
 ---
 ## Reproducibility
 This project is fully reproducible using the data, scripts, and model files included in the repository. All preprocessing, modeling, and visualization steps are executed entirely through R code no manual data manipulation is required.
-All scripts that involve random number generation (model training, cross-validation) include a fixed seed at the top:
-- set.seed(2025)
+All scripts that involve random number generation (model training, cross-validation) include a fixed seed at the top.
 
 All data cleaning steps are implemented in 'Stat172_final_project/src/cleaning.R'
 Running this script will:
