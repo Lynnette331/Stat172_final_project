@@ -4,6 +4,10 @@ qb <- c("QB")
 nfl_qb <- nfl %>%
   filter(position %in% qb)
 
+nfl_qb$top_three_round_class <- factor(nfl_qb$top_three_round_bin, 
+                                          levels = c(0,1),
+                                          labels = c("Not Drafted", "Drafted") )
+
 
 nfl_qb <- nfl_qb %>%
   select(combineHeight, combineWeight, combineBMI, ageAtDraft,
