@@ -9,7 +9,7 @@ Last Updated: December 7, 2025
 ---
 ## 📌 Project Overview
 
-This project analyzes whether NFL Draft outcomes can be accurately predicted using only NFL Combine performance metrics. Our goal is to evaluate the predictive power of combine attributes—such as 40-yard dash, bench press, weight, and more—across different player positions. 
+This project analyzes whether NFL Draft outcomes can be accurately predicted using only NFL Combine performance metrics. Our goal is to evaluate the predictive power of combine attributes like 40-yard dash, bench press, weight, and more across different player positions. 
 
 We apply multiple statistical learning techniques, compare model performance, identify key predictors, and generate reproducible visualizations and trained model files. This project demonstrates how combine performance translates into draft success.
 
@@ -134,7 +134,46 @@ install.packages(c(
 ```
 ---
 ## Reproducibility
+This project is fully reproducible using the data, scripts, and model files included in the repository. All preprocessing, modeling, and visualization steps are executed entirely through R code no manual data manipulation is required.
+All scripts that involve random number generation (e.g., model training, cross-validation) include a fixed seed at the top:
+- set.seed(2025)
 
+All data cleaning steps are implemented in 'Stat172_final_project/src/cleaning.R'
+Running this script will:
+- Read raw combine and draft data
+- Merge datasets
+- Filter years 2000+
+- Create region variables
+- Impute missing values
+- Construct modeling variable (top 3 round picks)
+
+## Reproducing the Full Analysis
+To reproduce all models, figures, and outputs:
+- Open R or RStudio.
+- Set the working directory to the root project folder:
+- setwd("path/to/Stat172_final_project")
+- Run the cleaning script: source("src/cleaning.R")
+- Run the modeling scripts for each player group:
+  - source("src/allPlayers.R")
+  - source("src/QBs.R")
+  - source("src/smallerPositions.R")
+  - source("src/OandDLine.R")
+  - source("src/defense.R")
+  - source("src/offense.R")
+- Run the penalized regression analyses:
+    - source("src/ridgeandlasso.R")
+- Generate all visualizations:
+  - source("src/visualizations.R")
+- Running these scripts will create:
+  -  All ROC curves
+  -  Random forest importance plots
+  - Ridge and lasso coefficient paths
+  - Classification trees
+  - Final .rds model files
+  - All figures used in the report
+  - All outputs are automatically saved to the Output/ directory.
+  
+  
 
 
 
