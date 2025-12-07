@@ -1,13 +1,18 @@
 # Stat172_final_project
 ---
-**Predicting NFL Draft Outcomes Using Combine and NFL data
-**Authors: ** Haley Harves & Lynette Ndibalekera
-**Last Updated:**December 7, 2025
+Predicting NFL Draft Outcomes Using Combine and NFL data
+
+Authors: Haley Harves & Lynette Ndibalekera
+
+Last Updated: December 7, 2025
 ---
 ---
 ## 📌 Project Overview
-This project analyzes whether NFL Draft outcomes can be accurately predicted using only NFL Combine performance metrics. Our goal is to evaluate the predictive power of combine attributes—such as 40-yard dash, bench press, weight, and more—across different player positions.  
+
+This project analyzes whether NFL Draft outcomes can be accurately predicted using only NFL Combine performance metrics. Our goal is to evaluate the predictive power of combine attributes—such as 40-yard dash, bench press, weight, and more—across different player positions. 
+
 We apply multiple statistical learning techniques, compare model performance, identify key predictors, and generate reproducible visualizations and trained model files. This project demonstrates how combine performance translates into draft success.
+
 ---
 
 ### Project Structure
