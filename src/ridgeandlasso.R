@@ -41,6 +41,9 @@ lr_mle <- glm(top_three_round_bin ~ .,
               data = train.df,
               family = binomial(link = "logit"))
 
+#we have complete separation, lasso and ridge will penalize the likelihood
+#function and allow us to interpret coefficients better
+
 lr_ml_coefs <- coef(lr_mle)
 
 
@@ -116,14 +119,20 @@ ggsave("output/tesetdfpreds$MLEpred.pdf")
 mle_rocCurve <- roc(response = as.factor(test.df.preds$top_three_round_bin),
                     predictor = test.df.preds$mle_pred,
                     levels = c("0", "1"))
+plot(mle_rocCurve, print.thres = TRUE, print.auc = FALSE)
+ggsave("output/mle_rocCurve.pdf")
 
 lasso_rocCurve <- roc(response = as.factor(test.df.preds$top_three_round_bin),
                     predictor = test.df.preds$lasso_pred,
                     levels = c("0", "1"))
+plot(lasso_rocCurve, print.thres = TRUE, print.auc = FALSE)
+ggsave("output/lasso_rocCurve.pdf")
 
 ridge_rocCurve <- roc(response = as.factor(test.df.preds$top_three_round_bin),
                     predictor = test.df.preds$ridge_pred,
                     levels = c("0", "1"))
+plot(ridge_rocCurve, print.thres = TRUE, print.auc = FALSE)
+ggsave("output/ridge_rocCurve.pdf")
 
 #extract AUC 
 mle_AUC <- auc(mle_rocCurve)

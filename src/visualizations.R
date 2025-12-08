@@ -37,6 +37,8 @@ ggplot(nfl, aes(x = region, fill = factor(top_three_round_bin))) +
        x="Region", y="Proportion", fill="") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle=45, hjust=1))
+ggsave("output/regions.pdf")
+
 #the south produces more top 3 picks than any other region
 
 #heatmap of top3 picks by region
@@ -257,7 +259,7 @@ ggplot(plot_data, aes(x = position_group, y = combine40yd, fill = position_group
   ) +
   theme_minimal() +
   theme(legend.position = "none")
-=======
+
 ########Visualization to compare the 3 final forests for All Positions, Smaller Positions and QBs#############
 # Load each final forest you saved as an RDS file
 forest_all      <- readRDS("output/final_forest_ALL.rds")
