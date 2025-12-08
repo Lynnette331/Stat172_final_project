@@ -1,11 +1,19 @@
-# Stat172_final_project
+# Stat172 final project
 ---
-Predicting NFL Draft Outcomes
----
+Predicting NFL Draft Outcomes Using Combine and NFL data
 
-## Introduction
-This repository contains the code and data required for predicting NFL draft outcomes using NFL combine data that was downloaded from Opendatabay.
-Our goal of this project is to see how well we can predict draft outcomes using only NFL Combine data and analyze the important variable predictors.
+Authors: Haley Harves & Lynette Ndibalekera
+
+Last Updated: December 7, 2025
+---
+---
+## 📌 Project Overview
+
+This project analyzes whether NFL Draft outcomes can be accurately predicted using only NFL Combine performance metrics. Our goal is to evaluate the predictive power of combine attributes like 40-yard dash, bench press, weight, and more across different player positions. 
+
+We apply multiple statistical learning techniques, compare model performance, identify key predictors, and generate reproducible visualizations and trained model files. This project demonstrates how combine performance translates into draft success.
+
+---
 
 ### Project Structure
 ```
@@ -71,55 +79,102 @@ Our goal of this project is to see how well we can predict draft outcomes using 
 │       └── final_forest_smallerPositions.rds
 └── README.md
 ```
+---
+###  Data Sources
+We use two datasets downloaded from Opendatabay:
+- `combine.csv` — NFL Combine performance metrics (height, weight, speed, agility, etc.)  
+- `draft.csv` — NFL Draft results including picks, round, and player IDs
+**Source:** https://opendatabay.com  
+**Download Date:** November 2025  
+**Format:** Both files are CSV and merged by a shared player ID.
+  
+### Data Preparation
+All data cleaning is fully reproducible using `src/cleaning.R` and includes:
+- Merging combine and draft datasets  
+- Keeping combine participants from year 2000 onward  
+- Mapping U.S. states into geographic regions  
+- Imputing missing combine metrics  
+- Creating modeling variables (e.g., binary indicators for “Top 3 roun Picks”)  
+- Ensuring consistent data types and removing invalid entries  
 
-###  Data 
-The files containing the raw data are located in the 'Stat172_final_project/raw' folder
+A cleaned dataset is written to the `Output/` directory for downstream scripts.
+---
 
-## Cleaning
-We merged the combine data and the draft data on player ID keeping all combine players. We also filtered the data to keep only data from 2000 and beyond. Allocated different states to the regions where they belong and imputed missing values. 
+##  Models Implemented
+Our analysis includes:
 
-### 1. Code
-- All scripts with the code are located in the 'Stat_172_final_project/src' folder.
-  Requirements
-To install the required packages, run the following code in R:
+### **Random Forests**
+- Predict draft outcome probability  
+- Separate forests for all players, QBs, and smaller positions  
+- Variable importance extraction  
+- Position-specific ROC curves
+
+### **Ridge Regression**
+- Shrinkage applied to identify distributed importance  
+- Used primarily for prediction comparisons
+
+### **Lasso Regression**
+- Performs feature selection  
+- Identifies the most influential combine metrics
+
+### **Classification Trees**
+- Interpretable decision boundaries  
+- Includes tuned and pruned versions  
+- Position-specific trees
+
+---
+## 📦 Required R Packages
+Install all necessary packages with:
 
 ```r
-install.packages(c("tidyverse", "rpart", "rpart.plot", "pROC", "dplyr", "randomForest",
-                    "tidymodels", "glmnet", "usmap"))
+install.packages(c(
+  "tidyverse", "dplyr", "randomForest", "rpart", "rpart.plot", 
+  "tidymodels", "pROC", "glmnet", "usmap"
+))
 ```
-### 2. Visualizations
-- All visualizations were saved as PDF files and a located in the 'Stat172_final_project/output.
+---
+## Reproducibility
+This project is fully reproducible using the data, scripts, and model files included in the repository. All preprocessing, modeling, and visualization steps are executed entirely through R code no manual data manipulation is required.
+All scripts that involve random number generation (model training, cross-validation) include a fixed seed at the top.
 
-## Requirements
--  Libraries and packages : 
-  - tidyverse
-  - rpart
-  - rpart.plot
-  - pROC
-  - dplyr
-  - randomForest
-  - tidymodels
-  - glmnet
-  - usmap
+All data cleaning steps are implemented in 'Stat172_final_project/src/cleaning.R'
+Running this script will:
+- Read raw combine and draft data
+- Merge datasets
+- Filter years 2000+
+- Create region variables
+- Impute missing values
+- Construct modeling variable (top 3 round picks)
 
-### Models
+## Reproducing the Full Analysis
+To reproduce all models, figures, and outputs:
+- Open R or RStudio.
+- Set the working directory to the root project folder:
+- setwd("path/to/Stat172_final_project")
+- Run the cleaning script: source("src/cleaning.R")
+- Run the modeling scripts for each player group:
+  - source("src/allPlayers.R")
+  - source("src/QBs.R")
+  - source("src/smallerPositions.R")
+  - source("src/OandDLine.R")
+  - source("src/defense.R")
+  - source("src/offense.R")
+- Run the penalized regression analyses:
+    - source("src/ridgeandlasso.R")
+- Generate all visualizations:
+  - source("src/visualizations.R")
+- Running these scripts will create:
+  -  All ROC curves
+  -  Random forest importance plots
+  - Ridge and lasso coefficient paths
+  - Classification trees
+  - Final forests .rds model files
+  - All pdf plots used in the report
+  - All outputs are automatically saved to the Output/ directory.
+  
+  
 
-Random Forests :
-
-
-Ridge Regression:
-
-
-Lasso Regression: 
-
-------------------------------------------------------------------------
-## Authors
-
--   Haley Harves - Data Analyst
--   Lynette Ndibalekera - Data Analyst
--   12/7/2025"
-
-  output: "html_document"
+-----------------------------------------------------------------------
 
 
 

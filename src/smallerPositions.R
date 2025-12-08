@@ -185,4 +185,5 @@ m11 <- glm(top_three_round_bin ~ combine40yd + ageAtDraft + combineBroad + combi
            data = nfl_smaller, family = binomial(link = "logit")) 
 AIC(m11)
 # 3539
+summary(m11)
 # the model that best fits the data uses all the variables 

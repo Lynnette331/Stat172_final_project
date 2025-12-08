@@ -185,6 +185,7 @@ AIC(m9)
 m10 <- glm(top_three_round_bin ~ combine40yd + combineWeight + ageAtDraft + combineHeight + combineBMI + combine3cone + combineVert + combineBroad + combineBench + combineShuttle,
           data = nfl_model, family = binomial(link = "logit"))
 AIC(m10)
+summary(m10)
 # 5299.249
 # model 10 is our model with the lowest AIC
 # variables in the model

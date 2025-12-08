@@ -23,6 +23,7 @@ merged <- combine %>%
 merged <- merged %>%
   mutate(drafted = if_else(!is.na(round), 1, 0))
 
+
 # Keep only data from year 2000 and beyond
 nfl <- merged %>%
   filter(combineYear >= 2000)
@@ -106,10 +107,12 @@ nfl$drafted_class <- factor(nfl$top_three_round_bin,
                             levels = c(0,1),
                             labels = c("Not Drafted", "Drafted") )
 
+
 #create a class of the top three
 nfl$top_three_round_class <- factor(
   nfl$top_three_round_bin,
   levels = c(0, 1),
   labels = c("Not Drafted", "Drafted")
 )
+
 
