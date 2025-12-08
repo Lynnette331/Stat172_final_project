@@ -172,8 +172,8 @@ To reproduce all models, figures, and outputs:
   - All pdf plots used in the report
   - All outputs are automatically saved to the Output/ directory.
   
-  
-
+  Note: Used ChatGPT to troubleshoot how to save the 3 final forests from ALL, QBs and SmallerPositions as RDS files
+  to be able to analyze them using visualizations
 -----------------------------------------------------------------------
 
 
