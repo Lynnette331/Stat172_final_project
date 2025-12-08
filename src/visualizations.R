@@ -4,7 +4,7 @@ nfl_model <- nfl %>%
   select(combineHeight, combineWeight, combineBMI, ageAtDraft,
          combine40yd, combineVert, combineBench,
          combineShuttle, combineBroad, combine3cone,
-         region, top_three_round_bin)
+         region, top_three_round_bin, top_three_round_class)
 
 summary(nfl_model)
 
@@ -199,27 +199,32 @@ ggplot(nfl_model, aes(x = ageAtDraft, color = top_three_round_bin)) +
 
 # boxplot 
 
-# Create the data for the two groups
+# Create the two groups
 plot_data <- bind_rows(
-  nfl %>% mutate(group = "All Players"),
+  nfl %>% 
+    filter(top_three_round_bin == 0) %>% 
+    mutate(group = "Not Top 3 Rounds"),
+  
   nfl %>% 
     filter(top_three_round_bin == 1) %>% 
-    mutate(group = "Top 3 Round Picks")
+    mutate(group = "Top 3 Rounds")
 )
 
 # Make group a factor so ordering is correct
-plot_data$group <- factor(plot_data$group, 
-                          levels = c("All Players", "Top 3 Round Picks"))
+plot_data$group <- factor(
+  plot_data$group,
+  levels = c("Not Top 3 Rounds", "Top 3 Rounds")
+)
 
 # Plot
 ggplot(plot_data, aes(y = group, x = ageAtDraft, fill = group)) +
   geom_boxplot(alpha = 0.8) +
   scale_fill_manual(values = c(
-    "All Players" = "red",
-    "Top 3 Round Picks" = "lightblue"
+    "Not Top 3 Rounds" = "red",
+    "Top 3 Rounds" = "lightblue"
   )) +
   labs(
-    title = "Age at Draft: All Players vs. Top 3 Round Picks",
+    title = "Age at Draft: Not Top 3 vs Top 3 Round Picks",
     x = "Age at Draft",
     y = ""
   ) +
@@ -245,20 +250,35 @@ plot_data <- nfl %>%
   filter(position_group != "Other")
 
 
-ggplot(plot_data, aes(x = position_group, y = combine40yd, fill = position_group)) +
-  geom_violin(trim = FALSE, alpha = 0.6) +
-  geom_boxplot(width = 0.15, fill = "white", outlier.size = 0.8) +
-  scale_fill_manual(values = c(
-    "Agility Based Positions" = "red",
-    "Strength Based Positions" = "lightblue"
-  )) +
+plot_data <- plot_data %>%
+  mutate(top_three_num = ifelse(top_three_round_class == "Drafted", 1, 0))
+
+ggplot(plot_data, aes(x = position_group, y = combine40yd)) +
+  geom_violin(trim = FALSE, fill = "gray90") +
+  geom_jitter(aes(color = top_three_round_class), width = 0.2, alpha = 0.5) +
+  scale_color_manual(values = c("Drafted" = "red", "Not Drafted" = "lightblue")) +
   labs(
-    title = "40-yard Dash Times by Position Group",
+    title = "40-Yard Dash with Draft Status Overlaid",
     x = "Position Group",
-    y = "40-yard Dash Time (seconds)"
+    y = "40-yard Dash Time",
+    color = "Drafted Top 3?"
   ) +
+<<<<<<< HEAD
   theme_minimal() +
   theme(legend.position = "none")
+=======
+  theme_minimal()
+
+
+
+
+
+
+
+
+
+
+>>>>>>> 3adb02010bb710a1edfec6c4158a17d9ad35066d
 
 ########Visualization to compare the 3 final forests for All Positions, Smaller Positions and QBs#############
 # Load each final forest you saved as an RDS file
@@ -278,7 +298,7 @@ imp_df <- function(model, name) {
 # Create cleaned importance tables for each forest
 imp_all      <- imp_df(forest_all, "All Positions")
 imp_QBs  <- imp_df(forest_QBs, "Offense")
-imp_smaller  <- imp_df(forest_small, "Smaller Positions")
+imp_smaller  <- imp_df(forest_small, "Agility Based Positions")
 
 # Combine all importance tables into one dataset
 imp_full <- bind_rows(imp_all, imp_QBs, imp_smaller)
@@ -310,7 +330,7 @@ ggsave("output/forest_comparison.pdf")
 
 
 
->>>>>>> 8c9eb9ad8e5a73bcbaac54f67827fc4c7aa9512c
+
 
 
 
