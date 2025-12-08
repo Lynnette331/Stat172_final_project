@@ -9,7 +9,7 @@ nfl_model <- nfl[, !names(nfl) %in% c("playerID", "combinePosition", "ageAtDraft
                    "nflId", "region", "college", "playerProfileUrl", "homeCity",
                    "homeState", "homeCountry", "highSchool", "hsCity", "hsState", 
                    "hsCountry", "combine60ydShuttle", "combineWonderlic", "draftTeam", "combineArm",
-                   "drafted_class", "round", "drafted", "pick", "heightInches", "weight", "top_three_round_classDrafted"
+                   "drafted_class", "round", "drafted", "pick", "heightInches", "weight", "top_three_round_class"
                    )]
 
 # Fix for Date columns specifically
@@ -48,25 +48,27 @@ lr_ml_coefs <- coef(lr_mle)
 x.train <- model.matrix(top_three_round_bin ~ ., data = train.df)[,-1]
 x.test <- model.matrix(top_three_round_bin ~ ., data = test.df)[,-1]
 
-#create variables of 0/1 variable
-y.train <- as.vector(train.df$top_three_round_bin)
+#create vectors of 0/1 variable
+y.train <- as.vector(train.df$top_three_round_bin) %>% as.vector
 y.test <- as.vector(test.df$top_three_round_bin)
 
 
 lr_lasso_cv <- cv.glmnet(x.train, y.train, 
-                         family = "binomial"(link = "logit"),
+                         family = binomial(link = "logit"),
                          alpha = 1) 
 
 
 lr_ridge_cv <- cv.glmnet(x.train, y.train, 
-                         family = "binomial"(link = "logit"),
+                         family = binomial(link = "logit"),
                          alpha = 0)
 
 #plot results from cross validation procedures
+pdf("output/lassocv.pdf")
 plot(lr_lasso_cv, sign.lambda = 1)
-ggsave("output/lasso.pdf")
+dev.off()
+pdf("output/ridgecv.pdf")
 plot(lr_ridge_cv, sign.lambda = 1)
-ggsave("output/ridge.pdf")
+dev.off()
 
 #save the "best" lambdas
 best_lasso_lambda <- lr_lasso_cv$lambda.min
@@ -77,7 +79,6 @@ lr_lasso_coefs <- coef(lr_lasso_cv, s = "lambda.min") %>% as.matrix()
 
 lr_lasso_coefs
 lr_ridge_coefs
-
 
 #plot
 ggplot() +
@@ -109,7 +110,7 @@ test.df.preds <- test.df %>%
 
 cor(test.df.preds$mle_pred, test.df.preds$lasso_pred)
 plot(test.df.preds$mle_pred, test.df.preds$lasso_pred)
-
+ggsave("output/tesetdfpreds$MLEpred.pdf")
 
 #Finally make an ROC
 mle_rocCurve <- roc(response = as.factor(test.df.preds$top_three_round_bin),
@@ -137,6 +138,7 @@ cat("LASSO Regression:", round(lasso_AUC, 4), "\n")
 cat("Ridge Regression:", round(ridge_AUC, 4), "\n")
 
 # Plot all ROC curves together
+pdf("output/lasso_mle_ridge_ROC.pdf")
 plot(mle_rocCurve, col = "red", main = "ROC Curves Comparison")
 plot(lasso_rocCurve, col = "blue", add = TRUE)
 plot(ridge_rocCurve, col = "green", add = TRUE)
@@ -148,8 +150,7 @@ legend("bottomright",
                   paste("Ridge (AUC =", round(ridge_AUC, 3), ")")),
        col = c("red", "blue", "green"),
        lty = 1)
-
-
+dev.off()
 
 
 
